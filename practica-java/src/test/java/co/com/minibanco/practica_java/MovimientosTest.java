@@ -66,9 +66,22 @@ public class MovimientosTest {
     // Pista: collect(Collectors.groupingBy(Movimiento::cuenta))
     @Test
     void ejercicio5_agruparPorCuenta() {
-        Map<String, List<Movimiento>> porCuenta = null; // tu código aquí
+        Map<String, List<Movimiento>> porCuenta = movimientos.stream()
+                .collect(Collectors.groupingBy(Movimiento::cuenta));// tu código aquí
 
         assertEquals(2, porCuenta.get("111").size());
+    }
+
+
+    // EJERCICIO 6: convertir cada movimiento en un texto como "111: DEBITO 50000"
+    // Pista: map(m -> m.cuenta() + ": " + ...) y luego toList()
+    @Test
+    void ejercicio6_comoTexto() {
+        List<String> textos = movimientos.stream()
+                .map(m-> m.cuenta() + ": "+ m.tipo() + " " + m.monto())
+                .toList();// tu código aquí
+
+        assertEquals("111: DEBITO 50000", textos.get(0));
     }
 }
 
