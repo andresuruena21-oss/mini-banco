@@ -32,4 +32,26 @@ heredan de RuntimeException (con extends), y que sirven para representar cada er
 negocio con su propio nombre, como SaldoInsuficienteException, para saber exactamente
 qué salió mal.
 
-**Pregunta:** ...
+**Pregunta:** …
+
+
+## Día 3
+
+**Aprendí:** que el Scaffold de Bancolombia es un plugin de Gradle que genera
+el microservicio con Clean Architecture por comandos, en vez de crear las carpetas
+a mano como hice el día 2. Cada capa es un módulo separado (model, usecase,
+driven-adapters, entry-points y app-service), y Gradle no deja que el dominio use
+cosas de infraestructura, o sea la regla de dependencia queda protegida.
+Usé gm para generar los modelos, guc para los casos de uso y vs para validar
+la estructura. También aprendí Lombok: @Getter para leer los datos, @Builder para
+crear objetos nombrando cada campo sin escribir new, y toBuilder para crear una
+copia modificada, como en debitar. Y que Spring encuentra los casos de uso solo
+porque terminan en UseCase, sin ponerles @Service.
+
+**Me costó:** pasar el código de un proyecto al otro, porque había que cambiar
+los package e imports, y que el record usa saldo() pero con Lombok es getSaldo().
+También aprendí que si una clase depende de otra que tiene errores, toca arreglar
+primero la otra (me pasó con el EventoGatewayFalso). Y que el código real va en
+main y las pruebas en test.
+
+**Pregunta:** ¿cómo se ve el caso de uso cuando lo pasemos a Mono y Flux?
