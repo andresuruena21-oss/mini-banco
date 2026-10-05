@@ -55,3 +55,21 @@ primero la otra (me pasó con el EventoGatewayFalso). Y que el código real va e
 main y las pruebas en test.
 
 **Pregunta:** ¿cómo se ve el caso de uso cuando lo pasemos a Mono y Flux?
+
+
+
+## Día 4
+
+**Aprendí:** la programación reactiva es como un mesero que no se queda esperando
+a la cocina, sino que atiende otras mesas mientras tanto; así con pocos hilos se
+atienden muchas peticiones. Mono es una promesa de 0 o 1 valor y Flux de varios.
+Nada pasa hasta que alguien se suscribe, como el Stream sin operación final.
+map es para transformar con un valor normal y flatMap cuando la lambda devuelve
+otro Mono, porque si no queda un Mono dentro de otro y nunca se ejecuta.
+switchIfEmpty es como el orElseThrow, zip busca dos cosas al tiempo, then sigue
+con otra cosa y thenReturn entrega un valor al final. Nunca usar .block().
+
+**Me costó:** entender el flatMap en Reactor y que en las pruebas no podía usar
+guardar() para preparar datos, porque nadie se suscribía.
+
+**Pregunta:** ¿cómo recibe WebFlux una petición HTTP y devuelve un Mono?
