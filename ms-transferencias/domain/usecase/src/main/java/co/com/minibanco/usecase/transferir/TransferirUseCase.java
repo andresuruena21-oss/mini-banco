@@ -8,6 +8,7 @@ import co.com.minibanco.model.excepciones.SaldoInsuficienteException;
 import co.com.minibanco.model.transferencia.Transferencia;
 import co.com.minibanco.model.transferencia.gateways.EventoGateway;
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -18,49 +19,43 @@ public class TransferirUseCase {
     private final CuentaRepository cuentas;
     private final EventoGateway eventos;
 
-    public Transferencia transferir(Long origenId, Long destinoId, BigDecimal monto) {
+    public Mono<Transferencia> transferir(Long origenId, Long destinoId, BigDecimal monto) {
 
-        // 1. El monto debe ser mayor a cero
+        // 1 y 2. Validaciones rápidas: en vez de "throw", se DEVUELVE un Mono con el error
         if (monto == null || monto.signum() <= 0) {
-            throw new MontoInvalidoException();
+            return Mono.error(new MontoInvalidoException());
         }
-
-        // 2. No se puede transferir a la misma cuenta
         if (origenId.equals(destinoId)) {
-            throw new MontoInvalidoException();
+            return Mono.error(new MontoInvalidoException());
         }
 
-        // 3 y 4. Buscar las dos cuentas
-        Cuenta origen = cuentas.buscarPorId(origenId)
-                .orElseThrow(() -> new CuentaNoExisteException(origenId));
-        Cuenta destino = cuentas.buscarPorId(destinoId)
-                .orElseThrow(() -> new CuentaNoExisteException(destinoId));
+        // 3 y 4. Buscar las dos cuentas AL MISMO TIEMPO con zip
+        return Mono.zip(buscar(origenId), buscar(destinoId))
+                // 5 y 6. Con las dos cuentas: revisar saldo y mover el dinero (devuelve otro Mono → flatMap)
+                .flatMap(par -> moverDinero(par.getT1(), par.getT2(), monto))
+                // 7. Cuando termine de mover el dinero, crear el comprobante
+                .then(Mono.fromSupplier(() -> Transferencia.builder()
+                        .origen(origenId)
+                        .destino(destinoId)
+                        .monto(monto)
+                        .fecha(LocalDateTime.now())
+                        .build()))
+                // 8. Publicar el evento y, cuando termine, entregar el comprobante
+                .flatMap(transferencia -> eventos.publicarTransferencia(transferencia)
+                        .thenReturn(transferencia));
+    }
 
-        // 5. Revisar el saldo
+    // Busca una cuenta; si la caja llega vacía, error (el orElseThrow reactivo)
+    private Mono<Cuenta> buscar(Long id) {
+        return cuentas.buscarPorId(id)
+                .switchIfEmpty(Mono.error(new CuentaNoExisteException(id)));
+    }
+
+    // Revisa el saldo y mueve el dinero
+    private Mono<Void> moverDinero(Cuenta origen, Cuenta destino, BigDecimal monto) {
         if (!origen.tieneSaldoPara(monto)) {
-            throw new SaldoInsuficienteException();
+            return Mono.error(new SaldoInsuficienteException());
         }
-
-        // 6. Mover el dinero y guardar
-        cuentas.guardar(origen.debitar(monto));
-        cuentas.guardar(destino.acreditar(monto));
-
-        // 7. Avisar
-        // 7. Avisar que hubo una transferencia
-
-        // Ya no usamos "new Transferencia(...)".
-        // El builder crea el objeto, y nosotros solo llenamos cada campo por su nombre.
-        Transferencia transferencia = Transferencia.builder()   // abro el "formulario" para crear una transferencia
-                .origen(origenId)                               // casilla origen: el número de la cuenta que envía
-                .destino(destinoId)                             // casilla destino: el número de la cuenta que recibe
-                .monto(monto)                                   // casilla monto: cuánto se transfiere
-                .fecha(LocalDateTime.now())                     // casilla fecha: la fecha y hora de este momento
-                .build();                                       // "listo, créalo": aquí, por dentro, se hace el new
-
-        // El builder solo CREA la transferencia; quien avisa es esta línea:
-        eventos.publicarTransferencia(transferencia);
-
-        // 8. Entregar el comprobante
-        return transferencia;
+        return cuentas.actualizarSaldos(origen.debitar(monto), destino.acreditar(monto));
     }
 }

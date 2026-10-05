@@ -4,6 +4,7 @@ import co.com.minibanco.model.cuenta.Cuenta;
 import co.com.minibanco.model.cuenta.gateways.CuentaRepository;
 import co.com.minibanco.model.excepciones.MontoInvalidoException;
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 
@@ -12,19 +13,14 @@ public class CrearCuentaUseCase {
 
     private final CuentaRepository cuentas;
 
-    public Cuenta crear(Long id, String titular, BigDecimal saldoInicial) {
-        // Una cuenta no puede empezar con saldo negativo
+    public Mono<Cuenta> crear(Long id, String titular, BigDecimal saldoInicial) {
         if (saldoInicial == null || saldoInicial.signum() < 0) {
-            throw new MontoInvalidoException();
+            return Mono.error(new MontoInvalidoException());
         }
 
-        Cuenta cuenta = Cuenta.builder()
-                .id(id)
-                .titular(titular)
-                .saldo(saldoInicial)
-                .build();
+        Cuenta cuenta = Cuenta.builder().id(id).titular(titular).saldo(saldoInicial).build();
 
-        cuentas.guardar(cuenta);
-        return cuenta;
+        return cuentas.guardar(cuenta)      // guarda (Mono<Void>)...
+                .thenReturn(cuenta);        // ...y cuando termine, entrega la cuenta
     }
 }

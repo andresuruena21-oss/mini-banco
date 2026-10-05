@@ -1,8 +1,9 @@
 package co.com.minibanco.model.transferencia.gateways;
 
 import co.com.minibanco.model.transferencia.Transferencia;
+import reactor.core.publisher.Mono;
 
 public interface EventoGateway {
 
-    void publicarTransferencia(Transferencia transferencia);
+    Mono<Void> publicarTransferencia(Transferencia transferencia);   // antes: void
 }
