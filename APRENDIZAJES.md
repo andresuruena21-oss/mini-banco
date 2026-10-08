@@ -73,3 +73,20 @@ con otra cosa y thenReturn entrega un valor al final. Nunca usar .block().
 guardar() para preparar datos, porque nadie se suscribía.
 
 **Pregunta:** ¿cómo recibe WebFlux una petición HTTP y devuelve un Mono?
+
+
+
+## Día 5
+
+**Aprendí:** a crear la API con WebFlux. El router es como el directorio del
+edificio que dice a qué método va cada ruta, y el handler es la oficina que recibe
+la petición, llama al caso de uso y arma la respuesta. Los DTOs son los datos que
+entran y salen por la API. El handler traduce los errores del negocio a códigos
+HTTP (404, 422, 400) con onErrorResume. También hice un adaptador en memoria con
+@Repository para que Spring enchufe el CuentaRepository, y probé todo con Bruno.
+
+**Me costó:** que las pruebas que generó el Scaffold fallaran porque probaban el
+router de ejemplo. Las reemplacé con WebTestClient y Mockito. También que el 422
+cambió de nombre a UNPROCESSABLE_CONTENT y el viejo estaba obsoleto.
+
+**Pregunta:** ¿cómo se guardan los datos en una base de datos real sin bloquear?
