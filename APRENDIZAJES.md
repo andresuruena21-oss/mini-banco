@@ -90,3 +90,21 @@ router de ejemplo. Las reemplacé con WebTestClient y Mockito. También que el 4
 cambió de nombre a UNPROCESSABLE_CONTENT y el viejo estaba obsoleto.
 
 **Pregunta:** ¿cómo se guardan los datos en una base de datos real sin bloquear?
+
+
+## Día 6
+
+**Aprendí:** a guardar los datos en PostgreSQL con R2DBC, que es la forma reactiva
+de hablar con la base de datos (JDBC bloquea al mesero). Levanté PostgreSQL con
+docker-compose y creé la tabla con un CHECK para que nunca acepte saldos negativos.
+Separé CuentaEntity (la tabla) de Cuenta (el dominio) y el adaptador las traduce.
+Cambié la base de datos sin tocar los casos de uso: solo cambié la toma de la pared.
+Una transacción es todo o nada: simulé una falla y sin transacción desaparecieron
+300 pesos, pero con transacción PostgreSQL hizo rollback. Si una librería bloquea,
+se usa subscribeOn(Schedulers.boundedElastic()).
+
+**Me costó:** que Spring no arrancaba porque había dos implementaciones de
+CuentaRepository (la de memoria y la de PostgreSQL), y que el puerto 8080 estaba
+ocupado por otro bootRun abierto.
+
+**Pregunta:** ¿cómo se avisa a otro microservicio que hubo una transferencia?
