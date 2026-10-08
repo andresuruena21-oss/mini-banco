@@ -5,6 +5,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import co.com.minibanco.model.excepciones.CuentaNoExisteException;
 import java.time.Duration;
+import reactor.core.scheduler.Schedulers;
 class PracticaReactorTest {
 
     @Test
@@ -174,6 +175,25 @@ class PracticaReactorTest {
 
         StepVerifier.create(resultado)
                 .expectNext("comprobante 001")
+                .verifyComplete();
+    }
+
+    // Simula una librería vieja que BLOQUEA (como el cliente de IBM MQ)
+    private String llamadaBloqueante() throws InterruptedException {
+        System.out.println("Ejecutando la llamada bloqueante en el hilo: " + Thread.currentThread().getName());
+        Thread.sleep(500);              // se queda parado medio segundo, como esperando una respuesta
+        return "respuesta de la librería vieja";
+    }
+
+    @Test
+    void codigoBloqueanteEnBoundedElastic() {
+        Mono<String> resultado = Mono.fromCallable(() -> llamadaBloqueante())   // envuelvo la llamada
+                .subscribeOn(Schedulers.boundedElastic());                      // la mando a los mensajeros
+
+        System.out.println("La prueba corre en el hilo: " + Thread.currentThread().getName());
+
+        StepVerifier.create(resultado)
+                .expectNext("respuesta de la librería vieja")
                 .verifyComplete();
     }
 }

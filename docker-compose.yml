@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16                # la imagen oficial de PostgreSQL, versión 16
+    container_name: postgres-banco    # el nombre de nuestro contenedor
+    ports:
+      - "5432:5432"                   # puerto de tu Mac : puerto del contenedor
+    environment:
+      POSTGRES_DB: banco              # crea una base de datos llamada "banco"
+      POSTGRES_USER: banco            # usuario
+      POSTGRES_PASSWORD: banco123     # contraseña (solo para práctica local)
+    volumes:
+      - datos-postgres:/var/lib/postgresql/data   # guarda los datos en un volumen
+
+volumes:
+  datos-postgres:                     # declara el volumen
