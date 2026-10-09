@@ -25,3 +25,5 @@ include ':memoria'
 project(':memoria').projectDir = file('./infrastructure/driven-adapters/memoria')
 include ':r2dbc-postgresql'
 project(':r2dbc-postgresql').projectDir = file('./infrastructure/driven-adapters/r2dbc-postgresql')
+include ':kafka'
+project(':kafka').projectDir = file('./infrastructure/driven-adapters/kafka')
