@@ -108,3 +108,20 @@ CuentaRepository (la de memoria y la de PostgreSQL), y que el puerto 8080 estaba
 ocupado por otro bootRun abierto.
 
 **Pregunta:** ¿cómo se avisa a otro microservicio que hubo una transferencia?
+
+## Día 7
+
+**Aprendí:** Kafka es como un grupo de WhatsApp para los microservicios: uno publica
+un evento y los demás lo leen cuando pueden, sin esperarse ni conocerse. Los mensajes
+se guardan aunque se lean, por eso ms-notificaciones recibió un evento publicado dos
+días antes. Si dos consumidores están en el mismo grupo se reparten los mensajes; si
+están en grupos distintos, cada uno los recibe todos. La key manda los eventos de una
+misma cuenta a la misma partición para mantener el orden. Como Kafka entrega al menos
+una vez, el consumidor debe ser idempotente: guardo el eventoId y descarto repetidos.
+Los mensajes que fallan van a un dead letter topic para no bloquear la fila.
+
+**Me costó:** poner las dependencias en el módulo correcto. El Scaffold no me dejó
+compilar porque puse spring-context en usecase, y el dominio no puede conocer Spring.
+También que se me colaron comandos como mensajes porque el productor seguía abierto.
+
+**Pregunta:** ¿en qué se diferencia una cola de IBM MQ de un topic de Kafka?
