@@ -6,6 +6,9 @@ info:
 http:
   method: POST
   url: http://localhost:8080/api/transferencias
+  body:
+    type: json
+    data: '{"origen": 1, "destino": 2, "monto": -50}'
   auth: inherit
 
 settings:
