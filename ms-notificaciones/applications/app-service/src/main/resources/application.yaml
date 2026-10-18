@@ -17,6 +17,13 @@ spring:
     producer:
       key-serializer: "org.apache.kafka.common.serialization.StringSerializer"
       value-serializer: "org.apache.kafka.common.serialization.StringSerializer"
+ibm:
+  mq:
+    queue-manager: "QM1"              # la oficina de correos
+    channel: "DEV.APP.SVRCONN"        # la ventanilla de atención
+    conn-name: "localhost(1414)"      # dónde está: servidor(puerto)
+    user: "app"
+    password: "passw0rd"
 management:
   endpoints:
     web:

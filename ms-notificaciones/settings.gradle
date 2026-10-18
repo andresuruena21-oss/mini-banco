@@ -23,3 +23,7 @@ include ':memoria'
 project(':memoria').projectDir = file('./infrastructure/driven-adapters/memoria')
 include ':kafka'
 project(':kafka').projectDir = file('./infrastructure/entry-points/kafka')
+include ':mq'
+project(':mq').projectDir = file('./infrastructure/driven-adapters/mq')
+include ':sms'
+project(':sms').projectDir = file('./infrastructure/entry-points/sms')
